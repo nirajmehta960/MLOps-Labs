@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>California Housing</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3d7ab5 100%);
+      color: #1a1a2e;
+      padding: 2rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      max-width: 420px;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 2rem;
+    }
+    h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1e3a5f;
+    }
+    .subtitle {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    form { margin-bottom: 0; }
+    .field {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.35rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    input::placeholder { color: #94a3b8; }
+    button {
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.75rem 1.25rem;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    button:hover {
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transform: translateY(-1px);
+    }
+    button:active { transform: translateY(0); }
+    .result {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #0c4a6e;
+      min-height: 2.5rem;
+    }
+    .result.highlight {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>California Housing</h1>
+    <p class="subtitle">Enter the 8 block-level features to predict median house value.</p>
+    <form method="POST" action="/predict">
+      {% for f in features %}
+      <div class="field">
+        <label for="{{ f }}">{{ f }}</label>
+        <input type="number" step="any" name="{{ f }}" id="{{ f }}" placeholder="Enter value" required>
+      </div>
+      {% endfor %}
+      <button type="submit">Predict</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
+  <script>
+    document.querySelector('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const resultEl = document.getElementById('result');
+      resultEl.textContent = 'Predicting…';
+      resultEl.classList.remove('highlight');
+      const form = e.target;
+      const formData = new FormData(form);
+      const res = await fetch('/predict', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.error) {
+        resultEl.textContent = 'Error: ' + data.error;
+      } else {
+        resultEl.textContent = 'Predicted median house value: ' + data.formatted_usd;
+        resultEl.classList.add('highlight');
+      }
+    });
+  </script>
+</body>
+</html>
