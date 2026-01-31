@@ -1,0 +1,15 @@
+# Generated model
+*.pkl
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+
+# Virtual environment
+venv/
+.venv/
