@@ -1,0 +1,17 @@
+# Serving image for Compose (model loaded from volume at runtime)
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY src/requirements.txt /app/requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/app.py /app/
+COPY src/templates /app/templates
+COPY src/statics /app/statics
+
+EXPOSE 80
+# Docker "exposes" port 80 because it is the standard, well-known port for the HTTP (web) protocol
+
+CMD ["python", "app.py"]

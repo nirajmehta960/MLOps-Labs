@@ -1,0 +1,38 @@
+services:
+  # Service 1: Train the model
+  model-training:
+    image: python:3.10-slim
+    container_name: ml_trainer
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./src/requirements.txt:/app/requirements.txt
+      - model_exchange:/exchange  # Shared volume mount
+    # Run training -> Copy result to shared folder
+    command: >
+      sh -c "pip install -r requirements.txt &&
+      python src/model_training.py &&
+      cp housing_model.pkl /exchange/housing_model.pkl"
+
+  # Service 2: Serve the model
+  serving:
+    build:
+      context: .
+      dockerfile: Dockerfile.serving
+    image: lab1-serving
+    container_name: ml_serving
+    working_dir: /app
+    ports:
+      - "8080:80"
+    volumes:
+      - model_exchange:/exchange  # Shared volume mount
+    depends_on:
+      model-training:
+        condition: service_completed_successfully
+    # Copy result FROM shared folder -> Run server
+    command: >
+      sh -c "cp /exchange/housing_model.pkl ./housing_model.pkl &&
+      python app.py"
+
+volumes:
+  model_exchange:
