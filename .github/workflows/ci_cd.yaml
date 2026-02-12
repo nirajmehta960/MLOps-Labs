@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "Lab 2 - GitHub Labs/**"
+      - ".github/workflows/ci_cd.yaml"
   pull_request:
     branches:
       - main
+    paths:
+      - "Lab 2 - GitHub Labs/**"
+      - ".github/workflows/ci_cd.yaml"
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
