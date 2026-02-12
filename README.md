@@ -5,10 +5,10 @@ This repository contains the lab assignments for the **DADS 7305 - Machine Learn
 
 ## Lab Assignments
 
-| Lab | Title | Description | Status |
-| :--- | :--- | :--- | :--- |
-| **Lab 1** | **Docker Containers** | Introduction to containerization using Docker. Building and running ML applications in isolated environments. | Completed |
-| **Lab 2** | **GitHub Actions & CI/CD** | Building a Continuous Integration/Continuous Deployment pipeline using GitHub Actions. Automating testing, training, and deployment to Google Cloud Platform (GCS & Artifact Registry). | Completed |
+| Lab | Title | Description |
+| :--- | :--- | :--- |
+| **Lab 1** | **Docker Containers** | Introduction to building and running isolated ML applications with Docker. |
+| **Lab 2** | **GitHub Actions & CI/CD** | Building automated pipelines for testing, training, and GCS/Artifact Registry deployment. |
 
 ## Technologies Used
 *   **Version Control:** Git & GitHub
