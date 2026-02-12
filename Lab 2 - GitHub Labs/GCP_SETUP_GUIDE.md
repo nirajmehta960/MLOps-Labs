@@ -33,7 +33,7 @@ This is where your Docker images will be stored.
 
 1.  Search for **Artifact Registry** in the GCP Console.
 2.  Click **+ CREATE REPOSITORY**.
-3.  **Name:** `github_labs`
+3.  **Name:** `iris-pipeline-repo`
     *   *Note: This MUST match the `REPO_NAME` variable in your `.github/workflows/ci_cd.yaml` file.*
 4.  **Format:** `Docker`
 5.  **Mode:** `Standard`

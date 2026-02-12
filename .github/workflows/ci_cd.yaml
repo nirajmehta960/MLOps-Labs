@@ -11,7 +11,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-east1
-  REPO_NAME: github_labs
+  REPO_NAME: iris-pipeline-repo
   IMAGE_NAME: iris-model
   GCS_BUCKET_NAME: ${{ secrets.GCS_BUCKET_NAME }}
 

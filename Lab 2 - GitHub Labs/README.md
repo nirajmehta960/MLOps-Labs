@@ -39,7 +39,7 @@ Before running the pipeline, ensure you have the following:
 1.  **Google Cloud Platform Account:** With billing enabled.
 2.  **GCP Resources:**
     *   A **Google Cloud Storage Bucket** (to store models).
-    *   An **Artifact Registry Repository** named `github_labs` in `us-east1`.
+    *   An **Artifact Registry Repository** named `iris-pipeline-repo` in `us-east1`.
     *   A **Service Account** with `Storage Admin` and `Artifact Registry Writer` roles.
     *   *(See [GCP_SETUP_GUIDE.md](GCP_SETUP_GUIDE.md) for detailed setup instructions)*.
 3.  **GitHub Secrets:**
@@ -98,7 +98,7 @@ You can run the training script locally to verify it works before pushing.
 After the pipeline runs successfully, verify the output:
 
 1.  **Artifact Registry:**
-    *   Go to **GCP Console > Artifact Registry > github_labs**.
+    *   Go to **GCP Console > Artifact Registry > iris-pipeline-repo**.
     *   You should see a new Docker image tagged with the commit SHA and `latest`.
 2.  **Google Cloud Storage:**
     *   Go to **GCP Console > Cloud Storage > Buckets > [Your Bucket]**.
