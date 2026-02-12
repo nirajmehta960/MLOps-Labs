@@ -1,0 +1,6 @@
+pandas
+scikit-learn
+google-cloud-storage
+pytest
+joblib
+python-dotenv
