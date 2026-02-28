@@ -9,6 +9,7 @@ This repository contains the lab assignments for the **DADS 7305 - Machine Learn
 | :--- | :--- | :--- |
 | **Lab 1** | **Docker Containers** | Introduction to building and running isolated ML applications with Docker. |
 | **Lab 2** | **GitHub Actions & CI/CD** | Building automated pipelines for testing, training, and GCS/Artifact Registry deployment. |
+| **Lab 3** | **FastAPI & XGBoost** | Training a Linear Booster XGBoost model and serving predictions via a FastAPI REST endpoint. |
 
 ## Technologies Used
 *   **Version Control:** Git & GitHub
@@ -19,8 +20,10 @@ This repository contains the lab assignments for the **DADS 7305 - Machine Learn
     *   Artifact Registry
     *   Cloud Build API
     *   IAM (Service Accounts)
-*   **Programming Language:** Python 3.9
-*   **Machine Learning:** Scikit-learn (Random Forest Classifier)
+*   **Programming Language:** Python 3.9 / 3.10
+*   **Machine Learning:** Scikit-learn, XGBoost
+*   **API Framework:** FastAPI, Uvicorn
+*   **Data Validation:** Pydantic
 *   **Testing:** Pytest
 *   **Data Handling:** Pandas, NumPy
 *   **Environment Management:** Python venv, python-dotenv
