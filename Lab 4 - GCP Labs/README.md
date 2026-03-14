@@ -35,11 +35,71 @@ Lab 4 - GCP Labs/
 ## Setup & Prerequisites
 
 1.  **Training data:** Place `training_scenarios.csv` in `data/`. This file is produced by the SavVio model_pipeline (e.g. `model_pipeline/data/training_scenarios.csv` or the output of `generate_training_data()`).
-2.  **Google Cloud account** with billing enabled.
-3.  **gcloud CLI** installed and configured.
-4.  **Docker** installed (for local build and push to Artifact Registry).
-5.  **GCP APIs:** Enable **Cloud Run API**, **Cloud Storage API**, and **BigQuery API**.
-6.  **GCS bucket** and a **service account** with **Storage Admin** and **BigQuery User** for deploy.
+2.  **Google Cloud:** For deploying to Cloud Run and using `/upload` and `/query`, follow the GCP setup steps below.
+3.  **Local only:** **gcloud CLI** and **Docker** installed; no GCP setup required for `/` and `/predict`.
+
+---
+
+## GCP Setup
+
+### 1. Set your project in gcloud
+
+   ```bash
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+
+2. **Enable required APIs (Cloud Run, Storage, BigQuery, Container Registry):**
+
+   ```bash
+   gcloud services enable \
+     run.googleapis.com \
+     storage.googleapis.com \
+     bigquery.googleapis.com \
+     containerregistry.googleapis.com
+   ```
+
+### 3. Create a GCS bucket (for /upload)
+
+In the console: **Cloud Storage → Buckets → CREATE**, for example:
+
+   ```text
+   BUCKET_NAME = mlops-labs-lab4-bucket
+   REGION      = us-central1
+   ```
+
+### 4. Create a service account
+
+Create a service account and grant it these roles:
+   - `roles/storage.admin`
+   - `roles/bigquery.user`
+
+   Example name: `cloudrun-lab4-sa` → email will be  
+   `cloudrun-lab4-sa@YOUR_PROJECT_ID.iam.gserviceaccount.com`
+
+5. **Authenticate Docker for GCR:**
+
+   ```bash
+   gcloud auth configure-docker
+   ```
+
+You will use `YOUR_PROJECT_ID`, `BUCKET_NAME`, and the service account email in the build + deploy commands below.
+
+### 6. (Optional) Load training_scenarios into BigQuery for /query
+
+If you want `/query` to summarize your **own** data:
+
+1. In BigQuery, create a dataset (e.g. `mlops_labs`).
+2. Under that dataset, **Create table** with:
+   - Source: **Upload** → `data/training_scenarios.csv`
+   - Table ID: e.g. `training_scenarios`
+   - Auto-detect schema (or define it), ensure there is a `final_recommendation` column.
+3. When deploying Cloud Run, add these env vars:
+
+   ```bash
+   --set-env-vars BUCKET_NAME=YOUR_BUCKET_NAME,BQ_DATASET=mlops_labs,BQ_TABLE=training_scenarios
+   ```
+
+Then `/query` will run a BigQuery aggregation over `final_recommendation` and return counts of GREEN / YELLOW / RED from that table.
 
 ---
 
@@ -76,10 +136,10 @@ Then open `http://localhost:8080/` and try `GET /predict` (docs) and `POST /pred
 
 The Dockerfile builds the image by training on `data/training_scenarios.csv` inside the build, then serves the saved model.
 
-1.  **Build the image:**
+1.  **Build the image** (use `--platform linux/amd64` so Cloud Run can run it; required when building on Mac/ARM):
 
     ```bash
-    docker build -t gcr.io/YOUR_PROJECT_ID/cloudrun-recommendation-api .
+    docker build --platform linux/amd64 -t gcr.io/YOUR_PROJECT_ID/cloudrun-recommendation-api .
     ```
 
 2.  **Push and deploy:**
