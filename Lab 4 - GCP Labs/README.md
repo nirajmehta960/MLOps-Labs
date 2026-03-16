@@ -200,9 +200,11 @@ The Dockerfile builds the image by training on `data/training_scenarios.csv` ins
 
 ## Verification
 
+*   **Live API URL:** [https://cloudrun-recommendation-api-817520636463.us-central1.run.app/](https://cloudrun-recommendation-api-817520636463.us-central1.run.app/)
 *   **Cloud Run:** Check **Logs** and **Metrics** in the Cloud Run console.
 *   **GCS:** After calling `/upload`, confirm the file in your bucket.
 *   **BigQuery:** `/query` returns a short summary from the public dataset.
+
 
 ---
 
