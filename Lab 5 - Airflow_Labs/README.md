@@ -130,6 +130,8 @@ To remove volumes (database data): `docker compose down -v`.
 
 ## DAG Overview (Graph View)
 
+![Airflow DAG Graph](images/airflow.png)
+
 | Task ID | Role |
 | :--- | :--- |
 | `start` | Bash echo — run boundary marker |
