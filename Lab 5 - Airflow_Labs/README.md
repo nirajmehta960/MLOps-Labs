@@ -6,22 +6,22 @@ This lab uses **Apache Airflow** to orchestrate an end-to-end machine learning w
 
 ## Key Features
 
-*   **Orchestration:** Apache Airflow DAG `breast_cancer_training_pipeline` with `PythonOperator`, `BranchPythonOperator`, `BashOperator`, and optional `EmailOperator`.
-*   **Data:** Wisconsin breast cancer dataset loaded via `sklearn.datasets` (no external CSV required).
-*   **Preprocessing:** `StandardScaler`, stratified train/test split, artifacts persisted under `/opt/airflow/working_data`.
-*   **Parallel Training:** Logistic regression and random forest train on the same preprocessed bundle; `compare_models` picks the higher test accuracy and saves `best_model.pkl` under `/opt/airflow/model`.
-*   **Quality Gate:** Branch on `QUALITY_THRESHOLD` in `dags/pipeline_dag.py` — pass path writes `working_data/production_manifest.json`, then `pipeline_success_email` notifies you that training completed; fail path sends `quality_gate_failed_email` if SMTP is configured.
+- **Orchestration:** Apache Airflow DAG `breast_cancer_training_pipeline` with `PythonOperator`, `BranchPythonOperator`, `BashOperator`, and optional `EmailOperator`.
+- **Data:** Wisconsin breast cancer dataset loaded via `sklearn.datasets` (no external CSV required).
+- **Preprocessing:** `StandardScaler`, stratified train/test split, artifacts persisted under `/opt/airflow/working_data`.
+- **Parallel Training:** Logistic regression and random forest train on the same preprocessed bundle; `compare_models` picks the higher test accuracy and saves `best_model.pkl` under `/opt/airflow/model`.
+- **Quality Gate:** Branch on `QUALITY_THRESHOLD` in `dags/pipeline_dag.py` — pass path writes `working_data/production_manifest.json`, then `pipeline_success_email` notifies you that training completed; fail path sends `quality_gate_failed_email` if SMTP is configured.
 
 ---
 
 ## Technologies Used
 
-*   **Orchestration:** Apache Airflow (Celery Executor, Redis, PostgreSQL)
-*   **Containerization:** Docker & Docker Compose
-*   **Machine Learning:** Scikit-learn (Wisconsin Breast Cancer dataset)
-*   **Programming Language:** Python 3.10+
-*   **Data Handling:** Pandas, NumPy
-*   **Persistence:** Pickle (.pkl) for models and data, JSON for manifests
+- **Orchestration:** Apache Airflow (Celery Executor, Redis, PostgreSQL)
+- **Containerization:** Docker & Docker Compose
+- **Machine Learning:** Scikit-learn (Wisconsin Breast Cancer dataset)
+- **Programming Language:** Python 3.10+
+- **Data Handling:** Pandas, NumPy
+- **Persistence:** Pickle (.pkl) for models and data, JSON for manifests
 
 ---
 
@@ -55,8 +55,7 @@ Lab 5 - Airflow_Labs/
 ## Setup & Prerequisites
 
 1.  **Docker** and **Docker Compose** (v2: `docker compose`) installed.
-2.  **Do not commit** secrets or runtime output: `.env`, `config/`, `logs/`, `working_data/`, `model/`, and `*.pkl` are listed in `.gitignore`. Only source (`dags/`), `docker-compose.yaml`, `setup.sh`, `.env.example`, and docs belong in Git.
-3.  From the **MLOps Labs** repository root, open the lab folder:
+2.  From the **MLOps Labs** repository root, open the lab folder:
 
     ```bash
     cd "Lab 5 - Airflow_Labs"
@@ -128,18 +127,18 @@ The DAG implements a linear pipeline with a parallel training fork and a branch-
 
 ![Airflow DAG Graph View](images/airflow.png)
 
-| Task ID | Role |
-| :--- | :--- |
-| `start` | Bash echo — run boundary marker |
-| `ingest_breast_cancer` | Load sklearn dataset to `raw.pkl` |
-| `preprocess_and_split` | Scale + split → `preprocessed.pkl` |
-| `train_logistic_regression` / `train_random_forest` | Parallel estimators; results pushed via XCom |
-| `compare_models` | Choose best accuracy; save `best_model.pkl` |
-| `quality_gate_branch` | `BranchPythonOperator` — next task by threshold |
-| `record_production_manifest` | Writes JSON manifest (success path) |
-| `pipeline_complete` | Bash echo after manifest |
-| `pipeline_success_email` | Email on success path (uses `PIPELINE_ALERT_EMAIL`) |
-| `quality_gate_failed_email` | Email on fail path |
+| Task ID                                             | Role                                                |
+| :-------------------------------------------------- | :-------------------------------------------------- |
+| `start`                                             | Bash echo — run boundary marker                     |
+| `ingest_breast_cancer`                              | Load sklearn dataset to `raw.pkl`                   |
+| `preprocess_and_split`                              | Scale + split → `preprocessed.pkl`                  |
+| `train_logistic_regression` / `train_random_forest` | Parallel estimators; results pushed via XCom        |
+| `compare_models`                                    | Choose best accuracy; save `best_model.pkl`         |
+| `quality_gate_branch`                               | `BranchPythonOperator` — next task by threshold     |
+| `record_production_manifest`                        | Writes JSON manifest (success path)                 |
+| `pipeline_complete`                                 | Bash echo after manifest                            |
+| `pipeline_success_email`                            | Email on success path (uses `PIPELINE_ALERT_EMAIL`) |
+| `quality_gate_failed_email`                         | Email on fail path                                  |
 
 ```mermaid
 flowchart LR
@@ -183,18 +182,18 @@ The quality gate ensures only models meeting a performance threshold proceed to 
 QUALITY_THRESHOLD = 0.90
 ```
 
-*   **Pass:** Set to `0.90` (Passes usually; writes manifest).
-*   **Fail:** Set to **`0.99`** (Forces the failure branch; skip manifest, send fail mail).
+- **Pass:** Set to `0.90` (Passes usually; writes manifest).
+- **Fail:** Set to **`0.99`** (Forces the failure branch; skip manifest, send fail mail).
 
 ---
 
 ## Troubleshooting
 
-| Symptom | What to try |
-| :--- | :--- |
-| Permission errors on `logs/` or `working_data/` | Re-run `./setup.sh`. Ensure `AIRFLOW_UID` in `.env` matches your local `id -u`. |
-| `quality_gate_failed_email` fails | Ensure `SMTP_USER` / `SMTP_PASSWORD` are set correct, or use Gmail "App Passwords". |
-| Import error for `src.pipeline_tasks` | Keep `dags/src/__init__.py` in place; ensuring the module is loadable by the worker. |
+| Symptom                                         | What to try                                                                          |
+| :---------------------------------------------- | :----------------------------------------------------------------------------------- |
+| Permission errors on `logs/` or `working_data/` | Re-run `./setup.sh`. Ensure `AIRFLOW_UID` in `.env` matches your local `id -u`.      |
+| `quality_gate_failed_email` fails               | Ensure `SMTP_USER` / `SMTP_PASSWORD` are set correct, or use Gmail "App Passwords".  |
+| Import error for `src.pipeline_tasks`           | Keep `dags/src/__init__.py` in place; ensuring the module is loadable by the worker. |
 
 ---
 
@@ -205,6 +204,7 @@ docker compose down
 ```
 
 To wipe the database and artifacts for a fresh start:
+
 ```bash
 docker compose down -v
 rm -rf working_data/* model/*
@@ -214,8 +214,8 @@ rm -rf working_data/* model/*
 
 ## Lab Completion Summary
 
-*   **Orchestrated** a full ML workflow using Apache Airflow, managing complex task dependencies and branching logic.
-*   **Implemented Parallelism** by training multiple models simultaneously using Airflow's internal task distribution.
-*   **Applied a Quality Gate** to enforce model performance standards before updating the production manifest.
-*   **Integrated Artifact Management** to persist models and data across container runs and host volumes.
-*   **Configured Alerting** through automated emails for both pipeline success and quality failures.
+- **Orchestrated** a full ML workflow using Apache Airflow, managing complex task dependencies and branching logic.
+- **Implemented Parallelism** by training multiple models simultaneously using Airflow's internal task distribution.
+- **Applied a Quality Gate** to enforce model performance standards before updating the production manifest.
+- **Integrated Artifact Management** to persist models and data across container runs and host volumes.
+- **Configured Alerting** through automated emails for both pipeline success and quality failures.
