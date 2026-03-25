@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "Lab 2 - GitHub Labs/**"
+      - "Lab 2 - GitHub_Labs/**"
       - ".github/workflows/ci_cd.yaml"
   pull_request:
     branches:
       - main
     paths:
-      - "Lab 2 - GitHub Labs/**"
+      - "Lab 2 - GitHub_Labs/**"
       - ".github/workflows/ci_cd.yaml"
 
 env:
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "./Lab 2 - GitHub Labs"
+        working-directory: "./Lab 2 - GitHub_Labs"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     defaults:
       run:
-        working-directory: "./Lab 2 - GitHub Labs"
+        working-directory: "./Lab 2 - GitHub_Labs"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

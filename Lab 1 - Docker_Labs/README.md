@@ -1,4 +1,4 @@
-# Lab1 - Docker Labs
+# Lab 1: Docker — Containers & Serving
 
 This lab demonstrates containerizing an ML pipeline with Docker: training a regression model on the California housing dataset and optionally serving predictions via a Flask API.
 
@@ -15,7 +15,7 @@ This lab demonstrates containerizing an ML pipeline with Docker: training a regr
 ## Project structure
 
 ```
-Lab1 - Docker Labs/
+Lab 1 - Docker_Labs/
 ├── README.md
 ├── Dockerfile             # Multi-stage: train (stage 1) + serve (stage 2)
 ├── Dockerfile.serving     # Serving image for Compose (deps pre-installed)
@@ -41,10 +41,10 @@ Lab1 - Docker Labs/
 
 ## How to run
 
-Run all commands from the **Lab1 - Docker Labs** directory:
+Run all commands from the **Lab 1 - Docker_Labs** directory:
 
 ```bash
-cd "Lab1 - Docker Labs"
+cd "Lab 1 - Docker_Labs"
 ```
 
 ### Option 1: Train only

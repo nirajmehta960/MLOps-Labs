@@ -15,10 +15,10 @@ This lab shows how to train a **linear-booster XGBoost model** on a personal fin
 
 ## Project Structure
 
-All paths below are relative to `Lab 3 - Fast API/`:
+All paths below are relative to `Lab 3 - Fast_API/`:
 
 ```text
-Lab 3 - Fast API/
+Lab 3 - Fast_API/
 ├── README.md
 ├── requirements.txt            # Python dependencies for this lab
 ├── data/
@@ -47,7 +47,7 @@ The trained model and encoders are saved under a `model/` directory (created aut
 All commands below assume you start from the **MLOps Labs** repo root:
 
 ```bash
-cd "Lab 3 - Fast API"
+cd "Lab 3 - Fast_API"
 ```
 
 1. **Set up the environment:**

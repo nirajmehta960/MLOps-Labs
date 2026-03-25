@@ -16,10 +16,10 @@ This lab trains a **recommendation classifier** (GREEN / YELLOW / RED) on **SavV
 
 ## Project Structure
 
-All paths below are relative to `Lab 4 - GCP Labs/`:
+All paths below are relative to `Lab 4 - GCP_Labs/`:
 
 ```text
-Lab 4 - GCP Labs/
+Lab 4 - GCP_Labs/
 ├── README.md
 ├── Dockerfile              # Multi-stage: train from data/, then serve
 ├── requirements.txt
@@ -107,7 +107,7 @@ Then `/query` will run a BigQuery aggregation over `final_recommendation` and re
 
 ### Option 1: Run locally
 
-From the **Lab 4 - GCP Labs** directory:
+From the **Lab 4 - GCP_Labs** directory:
 
 ```bash
 python3 -m venv venv
