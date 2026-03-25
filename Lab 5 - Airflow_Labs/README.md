@@ -36,7 +36,7 @@ Lab 5 - Airflow_Labs/
 ├── setup.sh                  # Creates logs/plugins/config/working_data/model and a starter .env
 ├── .env.example              # AIRFLOW_UID, PIPELINE_ALERT_EMAIL, SMTP_*
 ├── requirements.txt          # For local IDE / lint only; containers use compose env pip line
-├── config/                   # Airflow config volume (populated on first init)
+├── config/                   # Airflow config (created on init; gitignored, not in repo)
 ├── dags/
 │   ├── pipeline_dag.py       # DAG definition: tasks and dependencies
 │   └── src/
@@ -55,7 +55,8 @@ Lab 5 - Airflow_Labs/
 ## Setup & Prerequisites
 
 1.  **Docker** and **Docker Compose** (v2: `docker compose`) installed.
-2.  From the **MLOps Labs** repository root, open the lab folder:
+2.  **Do not commit** secrets or runtime output: `.env`, `config/`, `logs/`, `working_data/`, `model/`, and `*.pkl` are listed in `.gitignore`. Only source (`dags/`), `docker-compose.yaml`, `setup.sh`, `.env.example`, and docs belong in Git.
+3.  From the **MLOps Labs** repository root, open the lab folder:
 
     ```bash
     cd "Lab 5 - Airflow_Labs"

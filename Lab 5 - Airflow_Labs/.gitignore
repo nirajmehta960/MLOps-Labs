@@ -1,8 +1,35 @@
+# Secrets — never commit (use .env.example as a template only)
 .env
+.env.local
+.env.*.local
+!.env.example
+
+# Airflow runtime directories (Docker bind mounts / local runs)
 logs/
+config/
+plugins/
 working_data/
 model/
-plugins/
+
+# Serialized ML / pipeline artifacts (also covered by model/ and working_data/)
+*.pkl
+*.pickle
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
