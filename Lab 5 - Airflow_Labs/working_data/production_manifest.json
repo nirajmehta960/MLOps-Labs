@@ -1,0 +1,6 @@
+{
+  "dag": "breast_cancer_training_pipeline",
+  "best_model": "logistic_regression",
+  "accuracy": 0.972027972027972,
+  "artifact": "/opt/airflow/model/best_model.pkl"
+}
