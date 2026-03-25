@@ -76,13 +76,22 @@ chmod +x setup.sh
 
 ### Step 2: Configure SMTP (Optional for Email Alerts)
 
-Edit `.env` and add your email settings:
+To receive success/failure emails, you need to configure an SMTP sender (we recommend **Gmail**).
+
+1.  **Enable 2-Step Verification:** Go to your [Google Account Security](https://myaccount.google.com/security).
+2.  **Generate App Password:** Navigate to [App Passwords](https://myaccount.google.com/apppasswords).
+3.  **Select App & Device:** Choose **'Mail'** and your current device (or **'Other'** and name it 'Airflow').
+4.  **Copy Code:** Copy the generated **16-character password** (e.g., `xxxx xxxx xxxx xxxx`).
+5.  **Update `.env`**: Edit your local `.env` file with these values:
 
 ```bash
-PIPELINE_ALERT_EMAIL=your-inbox@example.com
-SMTP_USER=your.sender@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+PIPELINE_ALERT_EMAIL=your-recipient@example.com  # Where alerts go
+SMTP_USER=your.sender@gmail.com                 # Your Gmail address
+SMTP_PASSWORD=your-16-character-app-password    # No spaces needed
 ```
+
+> [!TIP]
+> This DAG uses the default Airflow connection ID `smtp_default`, which is pre-configured in `docker-compose.yaml` to use Gmail (port 587, TLS).
 
 ### Step 3: Initialize the Airflow Database
 
