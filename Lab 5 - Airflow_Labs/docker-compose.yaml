@@ -66,14 +66,15 @@ x-airflow-common:
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     
     # SMTP connection for EmailOperator - uses variables from .env file
-    AIRFLOW_CONN_SMTP_DEFAULT: '{"conn_type": "smtp", "host": "smtp.gmail.com", "port": 587, "login": "${SMTP_USER}", "password": "${SMTP_PASSWORD}", "extra": {"from_email": "${SMTP_USER}", "disable_ssl": true, "disable_tls": false}}'
+    AIRFLOW_CONN_SMTP_DEFAULT: '{"conn_type": "smtp", "host": "smtp.gmail.com", "port": 587, "login": "${SMTP_USER:-}", "password": "${SMTP_PASSWORD:-}", "extra": {"from_email": "${SMTP_USER:-}", "disable_ssl": true, "disable_tls": false}}'
     
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
     # yamllint enable rule:line-length
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-    PIPELINE_ALERT_EMAIL: ${PIPELINE_ALERT_EMAIL:-you@example.com}
+    # Set PIPELINE_ALERT_EMAIL in .env to your real inbox (no default — avoids bounces to fake addresses).
+    PIPELINE_ALERT_EMAIL: ${PIPELINE_ALERT_EMAIL:-}
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- pandas numpy scikit-learn scipy}

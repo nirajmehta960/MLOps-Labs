@@ -6,7 +6,6 @@ compares accuracies, branches on a quality threshold, then records a JSON manife
 a completion marker, and a success email (or a failure email on the other branch).
 """
 from __future__ import annotations
-
 import os
 from datetime import timedelta
 
@@ -29,11 +28,11 @@ from src.pipeline_tasks import (
     write_production_manifest,
 )
 
-# Minimum test accuracy for the "pass" branch (raise to e.g. 0.99 to force the email path).
+# Quality gate threshold.
 QUALITY_THRESHOLD = 0.90
 
-# Notification recipient; set PIPELINE_ALERT_EMAIL in docker-compose / .env.
-ALERT_EMAIL = os.environ.get("PIPELINE_ALERT_EMAIL", "you@example.com")
+# Notification recipient from environment.
+ALERT_EMAIL = (os.environ.get("PIPELINE_ALERT_EMAIL") or "").strip()
 
 default_args = {
     "owner": "ml-pipeline",
@@ -45,7 +44,12 @@ default_args = {
 
 def _branch_on_quality(**context) -> str:
     """
-    Read compare_models XCom and return the next task_id for BranchPythonOperator.
+    Evaluate the best model's accuracy against our quality gate threshold using XCom data.
+    If the threshold is met, the pipeline proceeds to record the production manifest.
+    Otherwise, it aborts the deployment process and sends a failure alert email.
+    
+    Returns:
+        str: The task_id of the next execution branch.
     """
     comparison = context["ti"].xcom_pull(task_ids="compare_models")
     if meets_quality_gate(comparison, QUALITY_THRESHOLD):
@@ -54,7 +58,11 @@ def _branch_on_quality(**context) -> str:
 
 
 def _write_manifest(**context) -> None:
-    """Pull comparison dict from compare_models and write production_manifest.json."""
+    """
+    Retrieve the evaluated model metrics from the `compare_models` task (via XCom)
+    and delegate the artifact creation to the `write_production_manifest` utility.
+    This manifest signals successful model training to downstream systems.
+    """
     comparison = context["ti"].xcom_pull(task_ids="compare_models")
     write_production_manifest(comparison)
 
@@ -68,26 +76,26 @@ with DAG(
     tags=["breast_cancer", "ml", "training"],
     max_active_runs=1,
 ) as dag:
-    # Step 1: Marker task
+    # Start task
     start = BashOperator(
         task_id="start",
         bash_command='echo "Breast cancer ML pipeline run started"',
     )
 
-    # Step 2: Load sklearn dataset to working_data/raw.pkl
+    # Ingest dataset
     ingest = PythonOperator(
         task_id="ingest_breast_cancer",
         python_callable=ingest_dataset,
     )
 
-    # Step 3: Scale, split, save preprocessed.pkl for downstream tasks
+    # Preprocess data
     preprocess = PythonOperator(
         task_id="preprocess_and_split",
         python_callable=preprocess_data,
         op_args=[ingest.output],
     )
 
-    # Step 4a / 4b: Same input, two estimators (parallel in the graph)
+    # Train models in parallel
     train_lr = PythonOperator(
         task_id="train_logistic_regression",
         python_callable=train_logistic_regression,
@@ -100,14 +108,14 @@ with DAG(
         op_args=[preprocess.output],
     )
 
-    # Step 5: Pick best model by accuracy; XCom holds the comparison dict
+    # Compare model performance
     compare_models = PythonOperator(
         task_id="compare_models",
         python_callable=compare_and_select_best,
         op_args=[train_lr.output, train_rf.output],
     )
 
-    # Step 6: Branch to manifest + done + success email, or failure email
+    # Branch on quality gate
     branch = BranchPythonOperator(
         task_id="quality_gate_branch",
         python_callable=_branch_on_quality,
@@ -134,7 +142,7 @@ with DAG(
         ),
     )
 
-    # Sent only on the success path after training + manifest + completion echo
+    # Success notification
     pipeline_success_email = EmailOperator(
         task_id="pipeline_success_email",
         to=ALERT_EMAIL,
@@ -152,8 +160,19 @@ with DAG(
         ),
     )
 
-    # Task dependencies: fork after preprocess, join at compare, then branch
-    start >> ingest >> preprocess >> [train_lr, train_rf]
+    # --- Define Task Dependencies ---
+    
+    # Linear flow up to preprocessing
+    start >> ingest >> preprocess 
+    
+    # Parallel execution: branch out to train both models simultaneously
+    preprocess >> [train_lr, train_rf]
+    
+    # Wait for both models to finish, then compare them
     [train_lr, train_rf] >> compare_models >> branch
+    
+    # Conditional branches depending on compare_models output
+    # Pass path
     branch >> record_production_manifest >> done >> pipeline_success_email
+    # Fail path
     branch >> quality_gate_failed_email

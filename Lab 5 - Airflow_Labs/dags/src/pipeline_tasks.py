@@ -6,7 +6,6 @@ trains logistic regression and random forest, compares test accuracy, and writes
 artifacts under /opt/airflow/working_data and /opt/airflow/model (Docker volume mounts).
 """
 from __future__ import annotations
-
 import os
 import pickle
 
@@ -30,10 +29,13 @@ BEST_MODEL = "best_model.pkl"
 
 def ingest_dataset() -> str:
     """
-    Load sklearn breast cancer frame, pickle to working_data/raw.pkl.
+    Load the Wisconsin breast cancer dataset from sklearn into a Pandas DataFrame.
+    The dataset is then serialized and saved as a pickle file to a persistent 
+    working directory (`/opt/airflow/working_data/raw.pkl`).
+    This simulates data ingestion from an external source or data warehouse.
 
     Returns:
-        str: Absolute path to the saved pickle file (for XCom / downstream tasks).
+        str: Absolute path to the saved pickle file (for XCom and downstream tasks).
     """
     bunch = load_breast_cancer(as_frame=True)
     df = bunch.frame
@@ -46,13 +48,18 @@ def ingest_dataset() -> str:
 
 def preprocess_data(raw_path: str) -> str:
     """
-    Stratified train/test split, fit StandardScaler on train, persist arrays.
+    Preprocess the raw ingested dataset for machine learning.
+    This includes:
+    1. Performing a stratified train/test split (75/25) to maintain class distributions.
+    2. Fitting a `StandardScaler` on the training set to normalize numerical features.
+    3. Transforming both training and testing sets using the fitted scaler.
+    4. Persisting the resulting numpy arrays, scaler, and metadata into `preprocessed.pkl`.
 
     Args:
-        raw_path: Path to raw.pkl from ingest_dataset.
+        raw_path: Path to `raw.pkl` from the `ingest_dataset` task.
 
     Returns:
-        str: Path to preprocessed.pkl containing arrays and scaler.
+        str: Absolute path to `preprocessed.pkl` containing the processed arrays and scaler.
     """
     with open(raw_path, "rb") as f:
         df = pickle.load(f)
@@ -88,10 +95,16 @@ def preprocess_data(raw_path: str) -> str:
 
 def train_logistic_regression(preprocessed_path: str) -> dict:
     """
-    Fit LogisticRegression, score on test set, save model to model/logistic_regression.pkl.
+    Train a Logistic Regression classifier on the preprocessed training set.
+    Evaluates the model on the test set to compute its accuracy.
+    The fitted model is saved to the model directory for potential production use.
+
+    Args:
+        preprocessed_path: Path to the preprocessed data bundle.
 
     Returns:
-        dict: Keys name, accuracy, path (for XCom and compare_and_select_best).
+        dict: A dictionary containing the model name, accuracy, and path to the saved model.
+              This will be pushed to Airflow XCom for the model comparison task.
     """
     with open(preprocessed_path, "rb") as f:
         bundle = pickle.load(f)
@@ -110,10 +123,16 @@ def train_logistic_regression(preprocessed_path: str) -> dict:
 
 def train_random_forest(preprocessed_path: str) -> dict:
     """
-    Fit RandomForestClassifier, score on test set, save model to model/random_forest.pkl.
+    Train a Random Forest classifier on the preprocessed training set.
+    Evaluates the model on the test set to compute its accuracy.
+    The fitted model is saved to the model directory.
+
+    Args:
+        preprocessed_path: Path to the preprocessed data bundle.
 
     Returns:
-        dict: Keys name, accuracy, path (for XCom and compare_and_select_best).
+        dict: A dictionary containing the model name, accuracy, and path to the saved model.
+              This is returned to Airflow XCom for the downstream comparison task.
     """
     with open(preprocessed_path, "rb") as f:
         bundle = pickle.load(f)
@@ -134,14 +153,16 @@ def train_random_forest(preprocessed_path: str) -> dict:
 
 def compare_and_select_best(lr_result: dict, rf_result: dict) -> dict:
     """
-    Pick the model with higher test accuracy and copy it to model/best_model.pkl.
+    Evaluate multiple trained models and select the best one based on test accuracy.
+    The winning model is then copied and saved as `best_model.pkl`. This acts as
+    the single source of truth for the model to deploy.
 
     Args:
-        lr_result: XCom dict from train_logistic_regression.
-        rf_result: XCom dict from train_random_forest.
+        lr_result: XCom dictionary from the Logistic Regression training task.
+        rf_result: XCom dictionary from the Random Forest training task.
 
     Returns:
-        dict: best_name, best_accuracy, per-model accuracies, best_model_path.
+        dict: A summary dictionary containing the name, accuracy, and path of the winning model.
     """
     winner = lr_result if lr_result["accuracy"] >= rf_result["accuracy"] else rf_result
     best_path = os.path.join(MODEL_DIR, BEST_MODEL)
@@ -167,7 +188,16 @@ def compare_and_select_best(lr_result: dict, rf_result: dict) -> dict:
 
 def meets_quality_gate(comparison: dict, threshold: float) -> bool:
     """
-    Return True if best_accuracy meets or exceeds threshold (used by branch callable).
+    Determine if the best model meets or exceeds the required quality threshold.
+    This boolean result determines whether the pipeline branches to deployment
+    (recording manifest) or fails out.
+
+    Args:
+        comparison: Summary dictionary from the `compare_and_select_best` task.
+        threshold: Minimum accuracy required to pass the quality gate.
+        
+    Returns:
+        bool: True if the model accuracy >= threshold, False otherwise.
     """
     ok = comparison["best_accuracy"] >= threshold
     print(
@@ -179,10 +209,13 @@ def meets_quality_gate(comparison: dict, threshold: float) -> bool:
 
 def write_production_manifest(comparison: dict) -> None:
     """
-    Write deployment metadata JSON to working_data/production_manifest.json.
+    Write deployment metadata (manifest) to `working_data/production_manifest.json`.
+    This JSON contains essential details about the winning model. In a real-world
+    setup, this manifest could be picked up by a CD pipeline (like ArgoCD or GitHub Actions)
+    to perform a model rollout.
 
     Args:
-        comparison: Dict returned by compare_and_select_best (from XCom).
+        comparison: Summary dictionary of the best model (retrieved via XCom).
     """
     import json
 

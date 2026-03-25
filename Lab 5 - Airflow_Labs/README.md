@@ -82,16 +82,13 @@ To receive success/failure emails, you need to configure an SMTP sender (we reco
 2.  **Generate App Password:** Navigate to [App Passwords](https://myaccount.google.com/apppasswords).
 3.  **Select App & Device:** Choose **'Mail'** and your current device (or **'Other'** and name it 'Airflow').
 4.  **Copy Code:** Copy the generated **16-character password** (e.g., `xxxx xxxx xxxx xxxx`).
-5.  **Update `.env`**: Edit your local `.env` file with these values:
+5.  **Update `.env`** with:
 
 ```bash
-PIPELINE_ALERT_EMAIL=your-recipient@example.com  # Where alerts go
-SMTP_USER=your.sender@gmail.com                 # Your Gmail address
-SMTP_PASSWORD=your-16-character-app-password    # No spaces needed
+PIPELINE_ALERT_EMAIL=your-recipient@example.com
+SMTP_USER=your.sender@gmail.com
+SMTP_PASSWORD=your-16-character-app-password
 ```
-
-> [!TIP]
-> This DAG uses the default Airflow connection ID `smtp_default`, which is pre-configured in `docker-compose.yaml` to use Gmail (port 587, TLS).
 
 ### Step 3: Initialize the Airflow Database
 
@@ -164,10 +161,10 @@ flowchart LR
 3.  **Data Folder:** Confirm `working_data/production_manifest.json` exists. It should look like this:
     ```json
     {
-      "model_type": "random_forest",
-      "test_accuracy": 0.96,
-      "artifact_path": "/opt/airflow/model/best_model.pkl",
-      "timestamp": "..."
+      "dag": "breast_cancer_training_pipeline",
+      "best_model": "logistic_regression",
+      "accuracy": 0.986,
+      "artifact": "/opt/airflow/model/best_model.pkl"
     }
     ```
 4.  **Logs:** Check `logs/dag_processor/` or `logs/dag_id=...` for troubleshooting.
