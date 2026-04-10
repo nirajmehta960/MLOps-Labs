@@ -1,0 +1,55 @@
+# Local ELK stack for Lab 6 (Elasticsearch 7.16.x — matches common Logstash tutorials).
+# Not for production: security is disabled for simplicity.
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
+    container_name: elasticsearch
+    restart: unless-stopped
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    networks:
+      - elk
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.16.2
+    container_name: logstash
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./logs:/logstash_dir/logs
+      - logstash_data:/usr/share/logstash/data
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    command: logstash -f /usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - elk
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.16.2
+    container_name: kibana
+    restart: unless-stopped
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    networks:
+      - elk
+
+volumes:
+  elastic_data:
+  logstash_data:
+
+networks:
+  elk:
+    driver: bridge
